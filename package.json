@@ -1,0 +1,16 @@
+{
+  "name": "ip-forgot",
+  "version": "1.0.0",
+  "description": "Forgot those IP addresses? No problem.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/sircodesalittle/ip-forgot.git",
+  "keywords": [],
+  "author": "Alex Dykstra",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^6.0.12"
+  }
+}
