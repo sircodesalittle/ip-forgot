@@ -3,4 +3,6 @@
 // All of the Node.js APIs are available in this process.
 const os = require('os');
 
-console.log(os.networkInterfaces());
+let codeBlock = document.createElement('pre');
+codeBlock.innerHTML = JSON.stringify(os.networkInterfaces(), undefined, 2);
+document.body.appendChild(codeBlock);
