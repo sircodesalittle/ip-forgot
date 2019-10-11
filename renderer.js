@@ -6,3 +6,5 @@ const os = require('os');
 let codeBlock = document.createElement('pre');
 codeBlock.innerHTML = JSON.stringify(os.networkInterfaces(), undefined, 2);
 document.body.appendChild(codeBlock);
+const netsh = require('./windows/netsh');
+netsh.getNetInterfaces();
