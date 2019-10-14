@@ -1,15 +1,27 @@
-const exec = require( 'child_process' ).exec;
-const netsh = exec( 'netsh.exe interface ip show config', { shell: true });
+const os = require('os');
 
-netsh.stdout.on( 'data', data => console.log( `stdout: ${data}` ) );
-netsh.stderr.on( 'data', data => console.log( `stderr: ${data}` ) );
-netsh.on( 'close', code => console.log( `child process exited with code ${code}` ) );
+function getNetInterfaces() {
 
+    // Grab JSON object that lists network interfaces and properties
+    let rawInterfaces = os.networkInterfaces();
 
-// TODO get interface names
+    // Create array to hold interface names
+    let interfacesArray = [];
+
+    // Loop through each interface and push them to the interfaces array
+    for (let key in rawInterfaces) {
+        interfacesArray.push(key)
+    }
+
+    // Return the array of interfaces
+    return interfacesArray;
+}
 
 // TODO get current configuration
 // list adapter's current configs
 
 // netsh int ip set address "NIC name" static 10.0.0.1 255.255.255.0 10.0.0.254
 
+module.exports= {
+    getNetInterfaces
+};
