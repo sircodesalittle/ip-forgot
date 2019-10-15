@@ -7,4 +7,7 @@ let codeBlock = document.createElement('pre');
 codeBlock.innerHTML = JSON.stringify(os.networkInterfaces(), undefined, 2);
 document.body.appendChild(codeBlock);
 const netsh = require('./windows/netsh');
-netsh.getNetInterfaces();
+let interfaces = netsh.getNetInterfaces();
+
+// Object array with name, IP, subnet, and family of each non-local interface
+let currentConfig = netsh.getCurrentConfig();
