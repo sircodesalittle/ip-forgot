@@ -4,7 +4,8 @@
   "description": "Forgot those IP addresses? No problem.",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dev": "set NODE_ENV=DEV && npm run start"
   },
   "repository": "https://github.com/sircodesalittle/ip-forgot.git",
   "keywords": [],

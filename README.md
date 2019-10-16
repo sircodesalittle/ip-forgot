@@ -2,9 +2,14 @@
 Forgot those IP addresses? No problem. IP Forgot is a utility to quickly set IP addresses for your computer (only Windows for right now)
 
 ## Development
+
+### Developing the UI
+Requires Vue CLI
 ```
+npm install -g @vue/cli
+cd frontend
 npm install
-npm start
+npm run serve
 ```
 
 ## Useful resources
