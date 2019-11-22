@@ -19,71 +19,19 @@
 
 <script>
     const os = require('os');
-    
+    const EventEmitter = require('events').EventEmitter;
+    import { detailedDiff } from 'deep-object-diff';
 
-    function getNetInterfaces() {
-
-        // Grab JSON object that lists network interfaces and properties
-        let rawInterfaces = os.networkInterfaces();
-
-        // Create array to hold interface names
-        let interfacesArray = [];
-
-        // Loop through each interface and push them to the interfaces array
-        for (let key in rawInterfaces) {
-            interfacesArray.push(key)
-        }
-
-        // Return the array of interfaces
-        return interfacesArray;
-    }
-
-
-    /*
-        Returns an object containing relevant information about current
-        interfaces. Will not include loopback and local interfaces.
-        For IPv4 interfaces:
-            family ("IPv4")
-            address
-            subnet mask
-        For IPv6 interfaces:
-            family ("IPv6")
-            address
-            subnet mask
-    */
-    function getCurrentConfig() {
-        // Grab JSON object that lists network interfaces and properties
-        let rawInterfaces = os.networkInterfaces();
-        console.log(os.networkInterfaces());
-
-        // Create array to hold current config details
-        let currentIfaces = [];
-        let id = 1;
-
-        // Loop through each interface and if it's not loopback, add to the list
-        for (let iface in rawInterfaces) {
-            for (let i = 0; i < rawInterfaces[iface].length; i++) {
-                if (!(rawInterfaces[iface][i]["internal"])) {
-                    currentIfaces.push(getInterfaceDetails(rawInterfaces[iface][i], iface, id));
-                    id++;
-                }
-            }
-        }
-
-        return currentIfaces;
-    }
-
-    function getInterfaceDetails(iface, name, id) {
-        let obj = {
-            id: id,
-            name: name,
-            family: iface["family"],
-            address: iface["address"],
-            subnet: iface["netmask"]
-        };
-
-        return obj;
-    }
+    let networkEventEmitter = new EventEmitter();
+    networkEventEmitter.on('added', (event) => {
+        console.log('added event', event)
+    });
+    networkEventEmitter.on('deleted', (event) => {
+        console.log('deleted event', event)
+    });
+    networkEventEmitter.on('updated', (event) => {
+        console.log('updated event', event)
+    });
 
     export default {
         name: 'network-interfaces',
@@ -94,7 +42,16 @@
         },
         mounted() {
             setInterval(() => {
-                this.networkInterfaces = Object.assign({}, os.networkInterfaces())
+                let currentNetworkInterfaces = os.networkInterfaces();
+                let diffs = detailedDiff(this.networkInterfaces, currentNetworkInterfaces);
+                if (Object.entries(diffs.added).length !== 0)
+                    networkEventEmitter.emit('added', diffs.added);
+                if (Object.entries(diffs.deleted).length !== 0)
+                    networkEventEmitter.emit('deleted', diffs.deleted);
+                if (Object.entries(diffs.updated).length !== 0)
+                    networkEventEmitter.emit('updated', diffs.updated);
+
+                this.networkInterfaces = Object.assign({}, currentNetworkInterfaces);
             }, 2000)
         }
     }
