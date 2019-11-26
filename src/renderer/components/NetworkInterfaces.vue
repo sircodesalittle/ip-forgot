@@ -64,9 +64,9 @@
 
 <script>
     const os = require('os');
-    const netsh = require('../ipconfig/windows/netsh.js').default;
-    console.log(netsh);
+    const netsh = require('windows-ip-config');
     const EventEmitter = require('events').EventEmitter;
+
     import {detailedDiff} from 'deep-object-diff';
 
     let networkEventEmitter = new EventEmitter();
