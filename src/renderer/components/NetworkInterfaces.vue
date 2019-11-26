@@ -137,7 +137,7 @@
 
     const applyAdapterConfig = (savedAdapters) => {
         for (const adapter of Object.keys(savedAdapters)) {
-            let currentAdapterConfig = os.networkInterfaces()[adapter];
+            let currentAdapterConfig = getNetworkInterfacesFiltered()[adapter];
             if (!currentAdapterConfig)
                 throw new Error('Adapter is not available in current adapters. Looking for: ' + adapter);
             // Iterate over current adapter and remove its IP addresses
@@ -176,11 +176,23 @@
         });
     };
 
+    const getNetworkInterfacesFiltered = () => {
+        const filteredOutAdapterNames = [
+            'Loopback Pseudo-Interface 1'
+        ];
+        let networkInterfaces = Object.assign({}, os.networkInterfaces());
+        for (let filteredName of filteredOutAdapterNames) {
+            if (networkInterfaces.hasOwnProperty(filteredName))
+                delete networkInterfaces[filteredName]
+        }
+        return networkInterfaces;
+    };
+
     export default {
         name: 'network-interfaces',
         data() {
             return {
-                networkInterfaces: Object.assign({}, os.networkInterfaces()),
+                networkInterfaces: Object.assign({}, getNetworkInterfacesFiltered()),
                 savedAdapters: Object.assign({}),
                 selectedAddToAdapter: '',
                 addIPv4Address: '',
@@ -190,7 +202,7 @@
         },
         mounted() {
             setInterval(() => {
-                let currentNetworkInterfaces = os.networkInterfaces();
+                let currentNetworkInterfaces = getNetworkInterfacesFiltered();
                 let diffs = detailedDiff(this.networkInterfaces, currentNetworkInterfaces);
                 if (Object.entries(diffs.added).length !== 0)
                     networkEventEmitter.emit('added', diffs.added);
