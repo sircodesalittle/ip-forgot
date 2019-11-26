@@ -1,6 +1,6 @@
 {
   "name": "ip-forgot",
-  "productName": "ip-forgot",
+  "productName": "IP Forgot",
   "version": "0.0.1",
   "author": "Alex Dykstra <alex@alexdykstra.com>",
   "description": "An electron-vue project",
