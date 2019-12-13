@@ -1,7 +1,7 @@
 <template>
     <div id="wrapper">
         <main>
-            <div class="columns">
+            <div class="columns is-multiline">
                 <div v-for="(nics, adapterName, index) in networkInterfaces" v-bind:key="index" class="column is-one-third">
                     <div class="card">
                         <header class="card-header">
@@ -82,7 +82,7 @@
                     <button class="delete" aria-label="close" v-on:click="showApplyConfiguration = false"></button>
                 </header>
                 <section class="modal-card-body">
-                    <div class="columns">
+                    <div class="columns is-multiline">
                         <div v-for="(nics, adapterName, index) in savedAdapterConfigurations" v-bind:key="index"
                              class="column is-half">
                             <div class="card">
