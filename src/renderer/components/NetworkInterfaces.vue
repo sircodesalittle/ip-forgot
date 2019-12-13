@@ -1,201 +1,176 @@
 <template>
     <div id="wrapper">
         <main>
-            <h1>Add Address to Adapter</h1>
-            <select v-model="selectedAddToAdapter">
-                <option disabled value="">Please select one</option>
-                <option v-for="(nics, adapterName, index) in networkInterfaces" v-bind:key="index">
-                    {{ adapterName }}
-                </option>
-            </select>
-            <h2>IPv4</h2>
-            <div>
-                <label for="addAddressInput">Address: </label>
-                <input name="addAddressInput" id="addAddressInput" v-model="addIPv4Address" placeholder="192.168.168.133">
-
-                <label for="addAddressSubnetInput">Subnet: </label>
-                <input name="addAddressSubnetInput" id="addAddressSubnetInput" v-model="addSubnet" placeholder="255.255.255.0">
-            </div>
-            <button v-on:click="executeAddIPv4Address($event)">Add IPv4 Address</button>
-
-            <h2>IPv6</h2>
-            <div>
-                <label for="addIPv6AddressInput">Address: </label>
-                <input name="addIPv6AddressInput" id="addIPv6AddressInput" v-model="addIPv6Address" placeholder="fe80::192:168:168:99/64">
-            </div>
-            <button v-on:click="executeAddIPv6Address($event)">Add IPv6 Address</button>
-
-            <h1>Current Adapter Configurations</h1>
-            <div>
-                <ul>
-                    <li v-for="(nics, adapterName, index) in networkInterfaces" v-bind:key="index">
-                        <button v-on:click="saveAdapterConfig($event, adapterName)">Save Adapter Configuration</button>
-                        {{ adapterName }}
-                        <ul>
-                            <li v-for="(nic, nicIndex) in nics" v-bind:key="nicIndex">
-                                {{ nic.address }}
-                                <button v-on:click="executeRemoveAddress($event, adapterName, nic)">Remove Address</button>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-
-            <h1>Saved Adapter Configurations</h1>
-            <button v-on:click="applySavedAdapterConfig($event)">Apply Saved Adapter Configuration</button>
-            <div>
-                <ul>
-                    <li v-for="(nics, adapterName, index) in savedAdapters" v-bind:key="index">
-                        <button v-on:click="removeSavedAdapterConfig($event, adapterName)">Delete Saved Adapter
-                            Configuration
-                        </button>
-                        {{ adapterName }}
-                        <ul>
-                            <li v-for="(nic, nicIndex) in nics" v-bind:key="nicIndex">
-                                {{ nic.address }}
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
+            <div class="columns">
+                <div v-for="(nics, adapterName, index) in networkInterfaces" v-bind:key="index" class="column is-one-third">
+                    <div class="card">
+                        <header class="card-header">
+                            <p class="card-header-title">
+                                {{ adapterName }}
+                            </p>
+                        </header>
+                        <div class="card-content">
+                            <div class="content">
+                                <ul style="list-style: none;">
+                                    <li v-for="(nic, index) in nics" v-bind:key="index">
+                                        <button class="delete is-small"
+                                                v-on:click="removeAddress(adapterName, nic)"></button>
+                                        {{ nic.address }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <footer class="card-footer">
+                            <a class="card-footer-item" v-on:click="saveAdapterConfig(adapterName, nics)">Save
+                                Configuration</a>
+                            <a class="card-footer-item" v-on:click="showAddIPAddress = true; selectedAddToAdapter = adapterName" >Add IP Address</a>
+                            <a class="card-footer-item" v-on:click="showApplyConfiguration = true; selectedAddToAdapter = adapterName">Apply Saved Configuration</a>
+                        </footer>
+                    </div>
+                </div>
             </div>
         </main>
+        <div class="modal" v-bind:class="{ 'is-active': showAddIPAddress }">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Add IP Address</p>
+                    <button class="delete" aria-label="close" v-on:click="showAddIPAddress = false"></button>
+                </header>
+                <section class="modal-card-body">
+                    <div class="control">
+                        <label class="radio">
+                            <input type="radio" name="ip_type" value="ipv4" v-model="ipType" checked>
+                            IPv4
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="ip_type" value="ipv6" v-model="ipType">
+                            IPv6
+                        </label>
+                    </div>
+                    <div v-if="ipType === 'ipv4'">
+                        <label for="addAddressInput">Address: </label>
+                        <input name="addAddressInput" id="addAddressInput" v-model="IPv4AddressToAdd"
+                               placeholder="192.168.168.133" autofocus>
+
+                        <label for="addAddressSubnetInput">Subnet: </label>
+                        <input name="addAddressSubnetInput" id="addAddressSubnetInput" v-model="SubnetToAdd"
+                               placeholder="255.255.255.0">
+                    </div>
+                    <div v-if="ipType === 'ipv6'">
+                        <label for="addIPv6AddressInput">Address: </label>
+                        <input name="addIPv6AddressInput" id="addIPv6AddressInput" v-model="IPv6AddressToAdd"
+                               placeholder="fe80::192:168:168:99/64">
+                    </div>
+                </section>
+                <footer class="modal-card-foot">
+                    <button v-if="ipType === 'ipv4'" class="button is-success"
+                            v-on:click="addIPv4Address(selectedAddToAdapter, IPv4AddressToAdd, SubnetToAdd); showAddIPAddress = false">Add IPv4 Address
+                    </button>
+                    <button v-if="ipType === 'ipv6'" class="button is-success"
+                            v-on:click="addIPv6Address(selectedAddToAdapter, IPv6AddressToAdd); showAddIPAddress = false">Add IPv6 Address
+                    </button>
+                    <button class="button" v-on:click="showAddIPAddress = false">Cancel</button>
+                </footer>
+            </div>
+        </div>
+        <div class="modal" v-bind:class="{ 'is-active': showApplyConfiguration }">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Saved Adapter Configurations</p>
+                    <button class="delete" aria-label="close" v-on:click="showApplyConfiguration = false"></button>
+                </header>
+                <section class="modal-card-body">
+                    <div class="columns">
+                        <div v-for="(nics, adapterName, index) in savedAdapterConfigurations" v-bind:key="index"
+                             class="column is-half">
+                            <div class="card">
+                                <header class="card-header">
+                                    <p class="card-header-title">
+                                        {{ adapterName }}
+                                    </p>
+                                </header>
+                                <div class="card-content">
+                                    <div class="content">
+                                        <ul style="list-style: none;">
+                                            <li v-for="(nic, nicIndex) in nics" v-bind:key="nicIndex">
+                                                {{ nic.address }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <footer class="card-footer">
+                                    <a class="card-footer-item"
+                                       v-on:click="applySavedAdapterConfig(selectedAddToAdapter, nics); showApplyConfiguration = false">
+                                        Apply Saved Configuration
+                                    </a>
+                                    <a v-on:click="removeSavedAdapterConfig(adapterName)">Delete Saved Adapter
+                                        Configuration
+                                    </a>
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <footer class="modal-card-foot">
+                    <button class="button" v-on:click="showApplyConfiguration = false">Cancel</button>
+                </footer>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
-    const os = require('os');
-    const netsh = require('windows-ip-config');
-    const EventEmitter = require('events').EventEmitter;
-
-    import {detailedDiff} from 'deep-object-diff';
-
-    let networkEventEmitter = new EventEmitter();
-    networkEventEmitter.on('added', (event) => {
-        console.log('added event', event)
-    });
-    networkEventEmitter.on('deleted', (event) => {
-        console.log('deleted event', event)
-    });
-    networkEventEmitter.on('updated', (event) => {
-        console.log('updated event', event)
-    });
-
-    const applyAdapterConfig = (savedAdapters) => {
-        for (const adapter of Object.keys(savedAdapters)) {
-            let currentAdapterConfig = getNetworkInterfacesFiltered()[adapter];
-            if (!currentAdapterConfig)
-                throw new Error('Adapter is not available in current adapters. Looking for: ' + adapter);
-            // Iterate over current adapter and remove its IP addresses
-            for (const nic of currentAdapterConfig) {
-                console.log(nic);
-                let ipVersion = 4;
-                if (nic.family === 'IPv6')
-                    ipVersion = 6;
-                netsh.deleteAdapterAddress(adapter, nic.address, ipVersion);
-            }
-            // Iterate over saved adapter and add its IP addresses
-            for (const nic of savedAdapters[adapter]) {
-                if (nic.family === 'IPv6')
-                    netsh.addAdapterIPv6Address(adapter, nic.cidr);
-                else
-                    netsh.addAdapterIPv4Address(adapter, nic.address, nic.netmask);
-            }
-        }
-    };
-
+    import { mapState } from "vuex";
 
     let fs = require('fs');
-    const SAVED_CONFIG_FILENAME = 'savedAdapterConfig.json';
-    const writeSavedAdapterConfig = (json) => {
-        fs.writeFile(SAVED_CONFIG_FILENAME, json, 'utf8', () => console.log('Saved config to disk'));
-    };
-
-    const loadSavedAdapterConfig = (loadedCallback) => {
-        fs.readFile(SAVED_CONFIG_FILENAME, 'utf8', (err, data) => {
-            if (err) {
-                console.error('Failed to load saved config', err);
-            } else {
-                console.log('Loaded saved config from disk');
-                loadedCallback(JSON.parse(data));
-            }
-        });
-    };
-
-    const getNetworkInterfacesFiltered = () => {
-        const filteredOutAdapterNames = [
-            'Loopback Pseudo-Interface 1'
-        ];
-        let networkInterfaces = Object.assign({}, os.networkInterfaces());
-        for (let filteredName of filteredOutAdapterNames) {
-            if (networkInterfaces.hasOwnProperty(filteredName))
-                delete networkInterfaces[filteredName]
-        }
-        return networkInterfaces;
-    };
-
     export default {
         name: 'network-interfaces',
         data() {
             return {
-                networkInterfaces: Object.assign({}, getNetworkInterfacesFiltered()),
-                savedAdapters: Object.assign({}),
                 selectedAddToAdapter: '',
-                addIPv4Address: '',
-                addSubnet: '',
-                addIPv6Address: ''
+                IPv4AddressToAdd: '',
+                SubnetToAdd: '',
+                IPv6AddressToAdd: '',
+                showAddIPAddress: false,
+                ipType: 'ipv4',
+                showApplyConfiguration: false,
             }
+        },
+        computed: {
+            ...mapState({
+                networkInterfaces: state => state.Adapters.networkInterfaces,
+                savedAdapterConfigurations: state => state.Configurations.savedAdapterConfigurations,
+            })
         },
         mounted() {
             setInterval(() => {
-                let currentNetworkInterfaces = getNetworkInterfacesFiltered();
-                let diffs = detailedDiff(this.networkInterfaces, currentNetworkInterfaces);
-                if (Object.entries(diffs.added).length !== 0)
-                    networkEventEmitter.emit('added', diffs.added);
-                if (Object.entries(diffs.deleted).length !== 0)
-                    networkEventEmitter.emit('deleted', diffs.deleted);
-                if (Object.entries(diffs.updated).length !== 0)
-                    networkEventEmitter.emit('updated', diffs.updated);
-
-                this.networkInterfaces = Object.assign({}, currentNetworkInterfaces);
+                this.$store.dispatch('REFRESH_ADAPTERS');
             }, 2000);
 
-            loadSavedAdapterConfig((loadedConfig) => {
-                this.savedAdapters = Object.assign({}, loadedConfig)
-            });
+            this.$store.dispatch('LOAD_ADAPTER_CONFIGURATIONS');
 
         },
         methods: {
-            saveAdapterConfig: function (event, adapterName) {
-                let updatedSavedAdapters = Object.assign({}, this.savedAdapters);
-                updatedSavedAdapters[adapterName] = {};
-                updatedSavedAdapters[adapterName] = this.networkInterfaces[adapterName];
-                this.savedAdapters = Object.assign({}, updatedSavedAdapters);
-                writeSavedAdapterConfig(JSON.stringify(this.savedAdapters));
+            saveAdapterConfig: function (adapterName, nics) {
+                this.$store.dispatch('ADD_ADAPTER_CONFIGURATION', {adapterName, nics});
             },
-            removeSavedAdapterConfig: function (event, adapterName) {
-                let updatedSavedAdapters = Object.assign({}, this.savedAdapters);
-                delete updatedSavedAdapters[adapterName];
-                this.savedAdapters = Object.assign({}, updatedSavedAdapters);
-                writeSavedAdapterConfig(JSON.stringify(this.savedAdapters));
+            removeSavedAdapterConfig: function (adapterName) {
+                this.$store.dispatch('REMOVE_ADAPTER_CONFIGURATION', {adapterName});
             },
-            applySavedAdapterConfig: function(event) {
-                console.log('Applying saved adapter config...');
-                applyAdapterConfig(this.savedAdapters);
+            applySavedAdapterConfig: function(adapterName, nicConfiguration) {
+                this.$store.dispatch('APPLY_SAVED_ADAPTER_CONFIG', {adapterName, nicConfiguration});
             },
-            executeAddIPv4Address: function(event) {
-                netsh.addAdapterIPv4Address(this.selectedAddToAdapter, this.addIPv4Address, this.addSubnet);
-                this.addIPv4Address = '';
-                this.addSubnet = '';
+            addIPv4Address(selectedAddToAdapter, IPv4AddressToAdd, SubnetToAdd) {
+                this.$store.dispatch('ADD_IPV4_ADDRESS_TO_ADAPTER', {selectedAddToAdapter, IPv4AddressToAdd, SubnetToAdd});
             },
-            executeAddIPv6Address: function(event) {
-                netsh.addAdapterIPv6Address(this.selectedAddToAdapter, this.addIPv6Address);
+            addIPv6Address(selectedAddToAdapter, IPv6AddressToAdd) {
+                this.$store.dispatch('ADD_IPV6_ADDRESS_TO_ADAPTER', {selectedAddToAdapter, IPv6AddressToAdd});
                 this.addIPv6Address = '';
             },
-            executeRemoveAddress: function($event, adapterName, nic) {
-                let ipVersion = 4;
-                if (nic.family === 'IPv6')
-                    ipVersion = 6;
-                netsh.deleteAdapterAddress(adapterName, nic.address, ipVersion);
+            removeAddress(adapterName, nic) {
+                this.$store.dispatch('REMOVE_IP_ADDRESS_TO_ADAPTER', {adapterName, nic});
             }
         }
     }
