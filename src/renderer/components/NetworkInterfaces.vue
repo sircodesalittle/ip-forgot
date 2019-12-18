@@ -21,8 +21,8 @@
                             </div>
                         </div>
                         <footer class="card-footer">
-                            <a class="card-footer-item" v-on:click="saveAdapterConfig(adapterName, nics)">Save
-                                Configuration</a>
+                            <a class="card-footer-item" v-on:click="showEditConfigurationName = true; selectedNics = nics">
+                                Save Configuration</a>
                             <a class="card-footer-item" v-on:click="showAddIPAddress = true; selectedAddToAdapter = adapterName" >Add IP Address</a>
                             <a class="card-footer-item" v-on:click="showApplyConfiguration = true; selectedAddToAdapter = adapterName">Apply Saved Configuration</a>
                         </footer>
@@ -71,6 +71,27 @@
                             v-on:click="addIPv6Address(selectedAddToAdapter, IPv6AddressToAdd); showAddIPAddress = false">Add IPv6 Address
                     </button>
                     <button class="button" v-on:click="showAddIPAddress = false">Cancel</button>
+                </footer>
+            </div>
+        </div>
+        <div class="modal" v-bind:class="{ 'is-active': showEditConfigurationName }">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Edit Configuration Name</p>
+                    <button class="delete" aria-label="close" v-on:click="showEditConfigurationName = false"></button>
+                </header>
+                <section class="modal-card-body">
+                    <label for="configurationName">Name: </label>
+                    <input name="configurationName" id="configurationName" v-model="configurationName"
+                           placeholder="Ethernet 1" autofocus>
+                </section>
+                <footer class="modal-card-foot">
+                    <button class="button is-success"
+                            v-on:click="saveAdapterConfig(configurationName, selectedNics); showEditConfigurationName = false">
+                        Save Configuration
+                    </button>
+                    <button class="button" v-on:click="showEditConfigurationName = false">Cancel</button>
                 </footer>
             </div>
         </div>
@@ -136,6 +157,9 @@
                 showAddIPAddress: false,
                 ipType: 'ipv4',
                 showApplyConfiguration: false,
+                showEditConfigurationName: false,
+                configurationName: '',
+                selectedNics: {},
             }
         },
         computed: {
