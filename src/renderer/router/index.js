@@ -8,7 +8,7 @@ export default new Router({
     {
       path: '/',
       name: 'landing-page',
-      component: require('@/components/NetworkInterfaces').default
+      component: require('@/components/LandingPage').default
     },
     {
       path: '*',

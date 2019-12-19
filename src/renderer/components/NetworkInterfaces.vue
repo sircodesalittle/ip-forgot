@@ -1,8 +1,9 @@
 <template>
-    <div id="wrapper">
+    <div id="wrapper" class="container is-fluid">
         <main>
             <div class="columns is-multiline">
-                <div v-for="(nics, adapterName, index) in networkInterfaces" v-bind:key="index" class="column is-one-third">
+                <div v-for="(nics, adapterName, index) in networkInterfaces" v-bind:key="index"
+                     class="column is-one-third">
                     <div class="card">
                         <header class="card-header">
                             <p class="card-header-title">
@@ -14,17 +15,20 @@
                                 <ul style="list-style: none;">
                                     <li v-for="(nic, index) in nics" v-bind:key="index">
                                         <button class="delete is-small"
-                                                v-on:click="removeAddress(adapterName, nic)"></button>
+                                                v-on:click="removeAddress(adapterName, nic)"/>
                                         {{ nic.address }}
                                     </li>
                                 </ul>
                             </div>
                         </div>
                         <footer class="card-footer">
-                            <a class="card-footer-item" v-on:click="showEditConfigurationName = true; selectedNics = nics">
+                            <a class="card-footer-item" v-on:click="openEditConfigurationName(nics, true)">
                                 Save Configuration</a>
-                            <a class="card-footer-item" v-on:click="showAddIPAddress = true; selectedAddToAdapter = adapterName" >Add IP Address</a>
-                            <a class="card-footer-item" v-on:click="showApplyConfiguration = true; selectedAddToAdapter = adapterName">Apply Saved Configuration</a>
+                            <a class="card-footer-item" v-on:click="openAddIPAddress(adapterName)">
+                                Add IP Address</a>
+                            <a class="card-footer-item"
+                               v-on:click="openSavedConfigurations(adapterName)">
+                                Apply Saved Configuration</a>
                         </footer>
                     </div>
                 </div>
@@ -35,7 +39,7 @@
             <div class="modal-card">
                 <header class="modal-card-head">
                     <p class="modal-card-title">Add IP Address</p>
-                    <button class="delete" aria-label="close" v-on:click="showAddIPAddress = false"></button>
+                    <button class="delete" aria-label="close" v-on:click="showAddIPAddress = false"/>
                 </header>
                 <section class="modal-card-body">
                     <div class="control">
@@ -65,10 +69,12 @@
                 </section>
                 <footer class="modal-card-foot">
                     <button v-if="ipType === 'ipv4'" class="button is-success"
-                            v-on:click="addIPv4Address(selectedAddToAdapter, IPv4AddressToAdd, SubnetToAdd); showAddIPAddress = false">Add IPv4 Address
+                            v-on:click="addIPv4Address(selectedAddToAdapter, IPv4AddressToAdd, SubnetToAdd)">
+                        Add IPv4 Address
                     </button>
                     <button v-if="ipType === 'ipv6'" class="button is-success"
-                            v-on:click="addIPv6Address(selectedAddToAdapter, IPv6AddressToAdd); showAddIPAddress = false">Add IPv6 Address
+                            v-on:click="addIPv6Address(selectedAddToAdapter, IPv6AddressToAdd)">
+                        Add IPv6 Address
                     </button>
                     <button class="button" v-on:click="showAddIPAddress = false">Cancel</button>
                 </footer>
@@ -79,7 +85,7 @@
             <div class="modal-card">
                 <header class="modal-card-head">
                     <p class="modal-card-title">Edit Configuration Name</p>
-                    <button class="delete" aria-label="close" v-on:click="showEditConfigurationName = false"></button>
+                    <button class="delete" aria-label="close" v-on:click="showEditConfigurationName = false"/>
                 </header>
                 <section class="modal-card-body">
                     <label for="configurationName">Name: </label>
@@ -88,7 +94,7 @@
                 </section>
                 <footer class="modal-card-foot">
                     <button class="button is-success"
-                            v-on:click="saveAdapterConfig(configurationName, selectedNics); showEditConfigurationName = false">
+                            v-on:click="saveAdapterConfig(configurationName, selectedNics)">
                         Save Configuration
                     </button>
                     <button class="button" v-on:click="showEditConfigurationName = false">Cancel</button>
@@ -100,7 +106,7 @@
             <div class="modal-card">
                 <header class="modal-card-head">
                     <p class="modal-card-title">Saved Adapter Configurations</p>
-                    <button class="delete" aria-label="close" v-on:click="showApplyConfiguration = false"></button>
+                    <button class="delete" aria-label="close" v-on:click="showApplyConfiguration = false"/>
                 </header>
                 <section class="modal-card-body">
                     <div class="columns is-multiline">
@@ -123,7 +129,7 @@
                                 </div>
                                 <footer class="card-footer">
                                     <a class="card-footer-item"
-                                       v-on:click="applySavedAdapterConfig(selectedAddToAdapter, nics); showApplyConfiguration = false">
+                                       v-on:click="applySavedAdapterConfig(selectedAddToAdapter, nics)">
                                         Apply Saved Configuration
                                     </a>
                                     <a v-on:click="removeSavedAdapterConfig(adapterName)">Delete Saved Adapter
@@ -143,7 +149,7 @@
 </template>
 
 <script>
-    import { mapState } from "vuex";
+    import {mapState} from "vuex";
 
     let fs = require('fs');
     export default {
@@ -168,28 +174,40 @@
                 savedAdapterConfigurations: state => state.Configurations.savedAdapterConfigurations,
             })
         },
-        mounted() {
-            setInterval(() => {
-                this.$store.dispatch('REFRESH_ADAPTERS');
-            }, 2000);
-
-            this.$store.dispatch('LOAD_ADAPTER_CONFIGURATIONS');
-
-        },
         methods: {
+            openEditConfigurationName: function (nic, showEditConfigurationName) {
+                this.selectedNics = nic;
+                this.showEditConfigurationName = showEditConfigurationName;
+            },
+            openAddIPAddress: function (adapterName) {
+                this.showAddIPAddress = true;
+                this.selectedAddToAdapter = adapterName;
+            },
+            openSavedConfigurations: function (adapterName) {
+                this.showApplyConfiguration = true;
+                this.selectedAddToAdapter = adapterName;
+            },
             saveAdapterConfig: function (adapterName, nics) {
+                this.showEditConfigurationName = false;
                 this.$store.dispatch('ADD_ADAPTER_CONFIGURATION', {adapterName, nics});
             },
             removeSavedAdapterConfig: function (adapterName) {
                 this.$store.dispatch('REMOVE_ADAPTER_CONFIGURATION', {adapterName});
             },
-            applySavedAdapterConfig: function(adapterName, nicConfiguration) {
+            applySavedAdapterConfig: function (adapterName, nicConfiguration) {
+                this.showApplyConfiguration = false;
                 this.$store.dispatch('APPLY_SAVED_ADAPTER_CONFIG', {adapterName, nicConfiguration});
             },
             addIPv4Address(selectedAddToAdapter, IPv4AddressToAdd, SubnetToAdd) {
-                this.$store.dispatch('ADD_IPV4_ADDRESS_TO_ADAPTER', {selectedAddToAdapter, IPv4AddressToAdd, SubnetToAdd});
+                this.showAddIPAddress = false;
+                this.$store.dispatch('ADD_IPV4_ADDRESS_TO_ADAPTER', {
+                    selectedAddToAdapter,
+                    IPv4AddressToAdd,
+                    SubnetToAdd
+                });
             },
             addIPv6Address(selectedAddToAdapter, IPv6AddressToAdd) {
+                this.showAddIPAddress = false;
                 this.$store.dispatch('ADD_IPV6_ADDRESS_TO_ADAPTER', {selectedAddToAdapter, IPv6AddressToAdd});
                 this.addIPv6Address = '';
             },
