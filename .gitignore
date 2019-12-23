@@ -11,3 +11,4 @@ thumbs.db
 !.gitkeep
 .idea/*
 savedAdapterConfig.json
+.npmrc
