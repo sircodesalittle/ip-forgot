@@ -14,7 +14,7 @@
                             <div class="content">
                                 <ul style="list-style: none;">
                                     <li v-for="(nic, index) in nics" v-bind:key="index">
-                                        {{ nic.address }}
+                                        <span class="tag is-light is-link is-medium">{{ nic.address }}</span>
                                     </li>
                                 </ul>
                             </div>
@@ -22,9 +22,11 @@
                         <footer class="card-footer">
                             <a class="card-footer-item"
                                v-on:click="openCurrentAdapters(nics)">
-                                Apply Saved Configuration</a>
+                                Apply
+                            </a>
                             <a class="card-footer-item" v-on:click="removeSavedAdapterConfig(adapterName)">
-                                Delete Configuration</a>
+                                Delete
+                            </a>
                         </footer>
                     </div>
                 </div>
@@ -51,7 +53,7 @@
                                     <div class="content">
                                         <ul style="list-style: none;">
                                             <li v-for="(nic, nicIndex) in nics" v-bind:key="nicIndex">
-                                                {{ nic.address }}
+                                                <span class="tag is-light is-link is-medium">{{ nic.address }}</span>
                                             </li>
                                         </ul>
                                     </div>
@@ -59,7 +61,7 @@
                                 <footer class="card-footer">
                                     <a class="card-footer-item"
                                        v-on:click="applySavedConfigToAdapter(adapterName)">
-                                        Apply To Adapter
+                                        Apply
                                     </a>
                                 </footer>
                             </div>

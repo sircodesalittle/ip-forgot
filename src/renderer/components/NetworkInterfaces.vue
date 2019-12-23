@@ -14,21 +14,22 @@
                             <div class="content">
                                 <ul style="list-style: none;">
                                     <li v-for="(nic, index) in nics" v-bind:key="index">
-                                        <button class="delete is-small"
-                                                v-on:click="removeAddress(adapterName, nic)"/>
-                                        {{ nic.address }}
+                                        <div class="tags has-addons">
+                                            <a class="tag is-delete is-medium" v-on:click="removeAddress(adapterName, nic)"></a>
+                                            <span class="tag is-light is-link is-medium">{{ nic.address }}</span>
+                                        </div>
                                     </li>
                                 </ul>
                             </div>
                         </div>
                         <footer class="card-footer">
                             <a class="card-footer-item" v-on:click="openEditConfigurationName(nics, true)">
-                                Save Configuration</a>
+                                Save</a>
                             <a class="card-footer-item" v-on:click="openAddIPAddress(adapterName)">
-                                Add IP Address</a>
+                                Add</a>
                             <a class="card-footer-item"
                                v-on:click="openSavedConfigurations(adapterName)">
-                                Apply Saved Configuration</a>
+                                Apply</a>
                         </footer>
                     </div>
                 </div>
@@ -130,10 +131,10 @@
                                 <footer class="card-footer">
                                     <a class="card-footer-item"
                                        v-on:click="applySavedAdapterConfig(selectedAddToAdapter, nics)">
-                                        Apply Saved Configuration
+                                        Apply
                                     </a>
-                                    <a v-on:click="removeSavedAdapterConfig(adapterName)">Delete Saved Adapter
-                                        Configuration
+                                    <a class="card-footer-item" v-on:click="removeSavedAdapterConfig(adapterName)">
+                                        Delete
                                     </a>
                                 </footer>
                             </div>
