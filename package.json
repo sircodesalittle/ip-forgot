@@ -20,7 +20,7 @@
     "postinstall": ""
   },
   "build": {
-    "productName": "ip-forgot",
+    "productName": "IP Forgot",
     "appId": "com.alexdykstra.ip-forgot",
     "directories": {
       "output": "build"
